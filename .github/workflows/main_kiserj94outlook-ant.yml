@@ -9,9 +9,20 @@ on:
       - main
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: src
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: src
 
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +53,10 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      contents: none
+    defaults:
+      run:
+        working-directory: ready/AzNamingTool
 
     steps:
       - name: Download artifact from build job
