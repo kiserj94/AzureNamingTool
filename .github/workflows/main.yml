@@ -1,27 +1,27 @@
 name: Azure Naming Tool
-defaults:
-  run:
-    working-directory: src
 on:
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v4.0.0
+      - uses: actions/checkout@v4.1.4
+      - uses: actions/setup-dotnet@v4.0.0
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: 8.0.x
       - uses: actions/cache@v4.0.2
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: ${{ runner.os }}-nuget-
-      - run: dotnet build --configuration Release
-      - run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - run: dotnet build "AzureNamingTool.csproj" -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - run: dotnet publish "AzureNamingTool.csproj" -c Release -o ${{env.DOTNET_ROOT}}/myapp
       - uses: actions/upload-artifact@v4.3.3
         with:
+          name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
           compression-level: 0
           overwrite: true
@@ -34,7 +34,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4.1.7
+        with:
+          name: .net-app
       - uses: Azure/webapps-deploy@v3.0.1
         with:
           app-name: kiserj94outlook-ant
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          startup-command: dotnet /home/site/wwwroot/AzureNamingTool.dll
+          target-path: /home/site/wwwroot
+          clean: true
+          restart: true
