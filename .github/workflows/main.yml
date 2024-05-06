@@ -20,10 +20,11 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
       - run: dotnet build --configuration Release
       - run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4.3.3
         with:
-          name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+          compression-level: 0
+          overwrite: true
   deploy:
     defaults:
       run:
@@ -33,8 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4.1.7
-        with:
-          name: .net-app
       - uses: Azure/webapps-deploy@v3.0.1
         with:
           app-name: kiserj94outlook-ant
